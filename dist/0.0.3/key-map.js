@@ -63,14 +63,10 @@
    KeyMap.prototype._addStep = function(step, shift, ctrl) {
       this._combo.push(((shift ? 'SHIFT-' : '') + (ctrl ? 'CTRL-' : '') + step).toLowerCase());
 
-      var eventType = this._getEventType();
-      if(eventType === ACTIVE_EVENT) {
-         this._trigger();
-      }
-      else {
-         clearTimeout(this._timeoutId);
-         this._timeoutId = setTimeout(this._trigger.bind(this), this._duration);
-      }
+      clearTimeout(this._timeoutId);
+
+      var duration = this._getEventType() === ACTIVE_EVENT ? 1 : this._duration;
+      this._timeoutId = setTimeout(this._trigger.bind(this), duration);
    };
 
    KeyMap.prototype._onDocumentKeyPress = function(e) {
