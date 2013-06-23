@@ -18,10 +18,18 @@
    var KeyUpSpecials = {
       27: "ESCAPE",
       8:  "BKSPACE",
-      46: "DELETE"
+      46: "DELETE",
+      37: "LEFT",
+      38: "UP",
+      39: "RIGHT",
+      40: "DOWN"
    };
 
-   var KeyPressFilter = /[A-Z0-9 ]/i
+   var KeyPressSpecials = {
+      13: "ENTER"
+   };
+
+   var KeyPressFilter = /[A-Z0-9 \/\\\-,\.;:]/i;
 
    function KeyMap(element) {
       this._combos = {};
@@ -59,25 +67,20 @@
    KeyMap.prototype._addStep = function(step, shift, ctrl) {
       this._combo.push(((shift ? 'SHIFT-' : '') + (ctrl ? 'CTRL-' : '') + step).toLowerCase());
 
-      var eventType = this._getEventType();
-      if(eventType === ACTIVE_EVENT) {
-         this._trigger();
-      }
-      else {
-         clearTimeout(this._timeoutId);
-         this._timeoutId = setTimeout(this._trigger.bind(this), this._duration);
-      }
+      clearTimeout(this._timeoutId);
+
+      var duration = this._getEventType() === ACTIVE_EVENT ? 1 : this._duration;
+      this._timeoutId = setTimeout(this._trigger.bind(this), duration);
    };
 
    KeyMap.prototype._onDocumentKeyPress = function(e) {
-      var char = String.fromCharCode(e.which);
-      if(KeyPressFilter.test(char) && ' INPUT SELECT TEXTAREA '.indexOf(' ' + e.currentTarget.nodeName + ' ') < 0) {
-         this._addStep(char, e.shiftKey, e.ctrlKey);
+      if(' INPUT SELECT TEXTAREA '.indexOf(' ' + e.currentTarget.nodeName + ' ') < 0) {
+         this._onKeyPress(e);
       }
    };
 
    KeyMap.prototype._onKeyPress = function(e) {
-      var char = String.fromCharCode(e.which);
+      var char = KeyPressSpecials[e.which] || String.fromCharCode(e.which);
       if(KeyPressFilter.test(char)) {
          this._addStep(char, e.shiftKey, e.ctrlKey);
       }
@@ -162,7 +165,7 @@
       }
    }
 
-   jQuery.fn.keyMap = function(a, b, c) {
+   var jQueryKeyMap = function(a, b, c) {
 
       var variant = arguments.length;
 
@@ -194,8 +197,23 @@
       return this;
    };
 
+   /**
+    * Adds key map functionality to the current selection.
+    *
+    * @param {Object|String} [config] When an object, treated as a map of events
+    * @param {Function|Object|String} [handler] When a function, treated as the handler for the event named in argument[0]
+    * @param {Object} [scope] When an object, treated as the scope for the handler for in argument[1]
+    *
+    * @function
+    * @name jQuery#keyMap
+    */
+   jQuery.fn.keyMap = jQueryKeyMap;
+
+   /**
+    * Adds key map functionality to the document as a whole
+    */
    jQuery.keyMap = function(a, b, c) {
-      return jQuery(document).keyMap(a, b, c);
+      return jQueryKeyMap.apply(jQuery(document), arguments);
    }
 
 }));

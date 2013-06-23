@@ -18,7 +18,11 @@
    var KeyUpSpecials = {
       27: "ESCAPE",
       8:  "BKSPACE",
-      46: "DELETE"
+      46: "DELETE",
+      37: "LEFT",
+      38: "UP",
+      39: "RIGHT",
+      40: "DOWN"
    };
 
    var KeyPressSpecials = {
