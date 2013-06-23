@@ -1,7 +1,7 @@
 {
   "name": "key-map",
   "description": "Key Mapping plugin for jQuery",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "author": "Steve King <steve@mydev.co>",
   "contributors": [
     {

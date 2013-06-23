@@ -34,8 +34,10 @@
    function KeyMap(element) {
       this._combos = {};
       this._combo = [];
+      this._isDoc = element.nodeType === 9;
+
       jQuery(element)
-               .on('keypress', (element.ownerDocument === document ? this._onDocumentKeyPress : this._onKeyPress).bind(this))
+               .on('keypress', (this._isDoc ? this._onDocumentKeyPress : this._onKeyPress).bind(this))
                .on('keyup', this._onKeyUp.bind(this));
    }
 
@@ -64,13 +66,21 @@
       return eventType;
    };
 
-   KeyMap.prototype._addStep = function(step, shift, ctrl) {
+   KeyMap.prototype._addStep = function(step, e) {
+      var shift = e.shiftKey;
+      var ctrl = e.ctrlKey;
+
       this._combo.push(((shift ? 'SHIFT-' : '') + (ctrl ? 'CTRL-' : '') + step).toLowerCase());
 
       clearTimeout(this._timeoutId);
 
-      var duration = this._getEventType() === ACTIVE_EVENT ? 1 : this._duration;
-      this._timeoutId = setTimeout(this._trigger.bind(this), duration);
+      var isActiveEvent = this._getEventType() === ACTIVE_EVENT;
+      if(isActiveEvent && !this._isDoc) {
+         this._trigger(e);
+      }
+      else {
+         this._timeoutId = setTimeout(this._trigger.bind(this), isActiveEvent ? 1 : this._duration);
+      }
    };
 
    KeyMap.prototype._onDocumentKeyPress = function(e) {
@@ -82,25 +92,25 @@
    KeyMap.prototype._onKeyPress = function(e) {
       var char = KeyPressSpecials[e.which] || String.fromCharCode(e.which);
       if(KeyPressFilter.test(char)) {
-         this._addStep(char, e.shiftKey, e.ctrlKey);
+         this._addStep(char, e);
       }
    };
 
    KeyMap.prototype._onKeyUp = function(e) {
       var keyUpSpecial = KeyUpSpecials[e.which];
       if(keyUpSpecial) {
-         this._addStep(keyUpSpecial, e.shiftKey, e.ctrlKey);
+         this._addStep(keyUpSpecial, e);
       }
    };
 
-   KeyMap.prototype._trigger = function() {
+   KeyMap.prototype._trigger = function(evt) {
       clearTimeout(this._timeoutId);
       var combo = this._combo.splice(0).join(' ');
       var handlers = this._combos[combo];
 
       for(var i = 0, l = handlers && handlers.length; i < l; i++) {
          try {
-            handlers[i][0].call(handlers[i][1]);
+            handlers[i][0].call(handlers[i][1], evt);
          }
          catch (e) {
             typeof console !== "undefined" && console.error(e);
