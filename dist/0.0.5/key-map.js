@@ -34,7 +34,7 @@
    function KeyMap(element) {
       this._combos = {};
       this._combo = [];
-      this._isDoc = element.ownerDocument === document;
+      this._isDoc = element.nodeType === 9;
 
       jQuery(element)
                .on('keypress', (this._isDoc ? this._onDocumentKeyPress : this._onKeyPress).bind(this))
