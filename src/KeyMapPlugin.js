@@ -84,7 +84,7 @@
    };
 
    KeyMap.prototype._onDocumentKeyPress = function(e) {
-      if(' INPUT SELECT TEXTAREA '.indexOf(' ' + e.currentTarget.nodeName + ' ') < 0) {
+      if(' INPUT SELECT TEXTAREA '.indexOf(' ' + e.target.nodeName + ' ') < 0) {
          this._onKeyPress(e);
       }
    };
